@@ -335,7 +335,7 @@ function _combine_regex{T <: AbstractString}(regex_parts::Set{T})
     mk_regex(String(take!(iob)))
 end
 
-function _build_regex_patterns{T <: AbstractString}(lang, flags::UInt32, patterns::Set{T}, words::Set{T})
+function _build_regex_patterns(lang::L, flags::UInt32, patterns::Set{T}, words::Set{T}) where {L <: Language, T <: AbstractString}
     ((flags & strip_whitespace) > 0) && push!(patterns, "\\s+")
     if (flags & strip_non_letters) > 0
         push!(patterns, "[^a-zA-Z\\s]")
@@ -344,14 +344,14 @@ function _build_regex_patterns{T <: AbstractString}(lang, flags::UInt32, pattern
         ((flags & strip_numbers) > 0) && push!(patterns, "\\d+")
     end
     if (flags & strip_articles) > 0
-        union!(words, articles(lang))
+        union!(words, articles(L))
     else
-        ((flags & strip_indefinite_articles) > 0) && union!(words, indefinite_articles(lang))
-        ((flags & strip_definite_articles) > 0) && union!(words, definite_articles(lang))
+        ((flags & strip_indefinite_articles) > 0) && union!(words, indefinite_articles(L))
+        ((flags & strip_definite_articles) > 0) && union!(words, definite_articles(L))
     end
-    ((flags & strip_prepositions) > 0) && union!(words, prepositions(lang))
-    ((flags & strip_pronouns) > 0) && union!(words, pronouns(lang))
-    ((flags & strip_stopwords) > 0) && union!(words, stopwords(lang))
+    ((flags & strip_prepositions) > 0) && union!(words, prepositions(L))
+    ((flags & strip_pronouns) > 0) && union!(words, pronouns(L))
+    ((flags & strip_stopwords) > 0) && union!(words, stopwords(L))
 
     words_pattern = _build_words_pattern(collect(words))
     !isempty(words_pattern) && push!(patterns, words_pattern)
